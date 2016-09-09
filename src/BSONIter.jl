@@ -26,7 +26,7 @@ type BSONIter
             bsonIter._wrap_,
             bsonObject._wrap_
             ) || error("BSONIter(): failure")
-        keyCStr = bytestring(key)
+        keyCStr = (key)
         bsonIter.done = !ccall(
             (:bson_iter_find, libbson),
             Bool, (Ptr{UInt8}, Ptr{UInt8}),
@@ -60,7 +60,7 @@ type BSONIter
             bsonIter._wrap_,
             bsonArray._wrap_
             ) || error("BSONIter(): failure")
-        keyCStr = bytestring(string(key))
+        keyCStr = (string(key))
         bsonIter.done = !ccall(
             (:bson_iter_find, libbson),
             Bool, (Ptr{UInt8}, Ptr{UInt8}),
@@ -137,7 +137,7 @@ function key(bsonIter::BSONIter)
         bsonIter._wrap_
         )
     cstr == C_NULL && error("bson_iter_key: failure")
-    bytestring(cstr)
+    unsafe_string(cstr)
 end
 
 function value_type(bsonIter::BSONIter)
@@ -192,12 +192,12 @@ function value(bsonIter::BSONIter)
     elseif ty == BSON_TYPE_MAXKEY
         return :maxkey
     elseif ty == BSON_TYPE_UTF8
-        return utf8(bytestring(ccall(
+        return unsafe_string(ccall(
             (:bson_iter_utf8, libbson),
             Ptr{UInt8}, (Ptr{UInt8}, Ptr{UInt8}),
             bsonIter._wrap_,
             C_NULL
-            )))
+            ))
     elseif ty == BSON_TYPE_OID
         data = Array(UInt8, 12)
         ptr = ccall(
